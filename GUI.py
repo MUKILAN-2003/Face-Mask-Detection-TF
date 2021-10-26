@@ -5,7 +5,7 @@ import tensorflow as tf
 
 detector = MTCNN()
 
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(2)
 
 faceCascade = cv2.CascadeClassifier(
     './haarcascades/haarcascade_frontalface_alt2.xml')
@@ -32,7 +32,7 @@ while (True):
     '''
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(
-        128, 128), flags=cv2.CASCADE_SCALE_IMAGE)
+        64, 64), flags=cv2.CASCADE_SCALE_IMAGE)
 
     for (x, y, w, h) in faces:
         harcascade_face = frame[y:y + h, x:x + w]
@@ -40,21 +40,21 @@ while (True):
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
         pred = model.predict(np.asarray(
             c_resize_to_pred).reshape(-1, 224, 224, 3)).round(decimals=3)
-
-        if (pred[0][2] > 0.5):
+        print(pred)
+        if (pred[0][2] > 0.2):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
             cv2.putText(frame, 'Wear Mask', (x, y - 15),
                         font, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
-        elif (pred[0][1] > 0.7):
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, 'Mask Weared', (x, y - 15),
-                        font, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-        elif (pred[0][0] > 0.3 and pred[0][1] < 0.7):
+        elif (pred[0][0] > 0.2 and pred[0][1] < 0.75):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
             cv2.putText(frame, 'Wear Mask Properly', (x, y - 15),
                         font, 1, (0, 255, 255), 2, cv2.LINE_AA)
+
+        elif (pred[0][1] > 0.98):
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(frame, 'Mask Weared', (x, y - 15),
+                        font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     cv2.imshow('Video', frame)
     if cv2.waitKey(1) and 0xFF == ord('q'):
